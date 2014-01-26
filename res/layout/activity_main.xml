@@ -60,4 +60,14 @@
         android:onClick="onClickClose"
         android:text="Close" />
 
+    <Button
+        android:id="@+id/btClear"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/tvRead"
+        android:layout_toRightOf="@+id/btClose"
+        android:onClick="onClickClear"
+        android:text="Clear" />
+    
+    
 </RelativeLayout>

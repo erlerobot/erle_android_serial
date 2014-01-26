@@ -15,6 +15,7 @@ import android.content.IntentFilter;
 import android.hardware.usb.UsbManager;
 import android.os.Bundle;
 import android.os.Handler;
+import android.text.Html;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -61,7 +62,7 @@ public class MainActivity extends Activity {
         btWrite = (Button) findViewById(R.id.btWrite);
         btClose = (Button) findViewById(R.id.btClose);
         
-//        tvReadScroll = (ScrollView) findViewById(R.id.tvRead);
+        tvReadScroll = (ScrollView) findViewById(R.id.tvRead);
 //        tvReadScroll.fullScroll(View.FOCUS_DOWN);
 
         updateView(false);
@@ -77,6 +78,12 @@ public class MainActivity extends Activity {
         filter.addAction(UsbManager.ACTION_USB_DEVICE_DETACHED);
         registerReceiver(mUsbReceiver, filter);
 
+//      String text = "<font color=#cc0029>OnCreate finished en rojo</font>";
+        String text = "<font color=#ffcc00>OnCreate finished</font>";
+        tvRead.append("\n");
+        tvRead.append(Html.fromHtml(text));
+        tvRead.append("\n");
+
     }
 
     public void onClickOpen(View v) {
@@ -85,6 +92,11 @@ public class MainActivity extends Activity {
 
 
     public void onClickWrite(View v) {
+        String text = "<font color=#ffcc00>OnClickWrite starting</font>";
+        tvRead.append("\n");
+        tvRead.append(Html.fromHtml(text));
+        tvRead.append("\n");
+
         if(ftDev == null) {
             return;
         }
@@ -93,7 +105,6 @@ public class MainActivity extends Activity {
                 Log.e(TAG, "onClickWrite : Device is not open");
                 return;
             }
-
             ftDev.setLatencyTimer((byte)16);
 
             String writeString = etWrite.getText().toString();
@@ -102,16 +113,22 @@ public class MainActivity extends Activity {
             ftDev.write(writeByte, writeString.length());
             // clean the content of the EditText
             etWrite.setText("");
-//            // put the scrollview down            
-//            tvReadScroll.fullScroll(View.FOCUS_DOWN);
-
         }
+        
+        text = "<font color=#ffcc00>OnClickWrite finished</font>";
+        tvRead.append("\n");
+        tvRead.append(Html.fromHtml(text));
+        tvRead.append("\n");
     }
 
     public void onClickClose(View v) {
         closeDevice();
     }
 
+    public void onClickClear(View v) {
+        tvRead.setText("");
+    }    
+    
     @Override
     public void onDestroy() {
         super.onDestroy();
@@ -128,6 +145,12 @@ public class MainActivity extends Activity {
 */
 
     private void openDevice() {
+//    	Log.d(TAG, "Open Device");
+        String text = "<font color=#cc0029>openDevice starting</font>";
+        tvRead.append("\n");
+        tvRead.append(Html.fromHtml(text));
+        tvRead.append("\n");
+    	
         if(ftDev != null) {
             if(ftDev.isOpen()) {
                 if(mThreadIsStopped) {
@@ -145,6 +168,11 @@ public class MainActivity extends Activity {
         devCount = ftD2xx.createDeviceInfoList(this);
 
         Log.d(TAG, "Device number : "+ Integer.toString(devCount));
+        text = "<font color=#cc0029>Device number </font>" + Integer.toString(devCount);
+        tvRead.append("\n");
+        tvRead.append(Html.fromHtml(text));
+        tvRead.append("\n");
+
 
         D2xxManager.FtDeviceInfoListNode[] deviceList = new D2xxManager.FtDeviceInfoListNode[devCount];
         ftD2xx.getDeviceInfoList(devCount, deviceList);
@@ -155,10 +183,22 @@ public class MainActivity extends Activity {
 
         if(ftDev == null) {
             ftDev = ftD2xx.openByIndex(this, 1);
+            text = "<font color=#cc0029>ftDev == null</font>";
+            tvRead.append("\n");
+            tvRead.append(Html.fromHtml(text));
+            tvRead.append("\n");                        
         } else {
+            text = "<font color=#cc0029>Before synchronized</font>";
+            tvRead.append("\n");
+            tvRead.append(Html.fromHtml(text));
+            tvRead.append("\n");                                	
             synchronized (ftDev) {
                 ftDev = ftD2xx.openByIndex(this, 1);
             }
+            text = "<font color=#cc0029>After synchronized</font>";
+            tvRead.append("\n");
+            tvRead.append(Html.fromHtml(text));
+            tvRead.append("\n");                                	            
         }
 
         if(ftDev.isOpen()) {
@@ -170,6 +210,12 @@ public class MainActivity extends Activity {
                 new Thread(mLoop).start();
             }
         }
+
+        text = "<font color=#cc0029>openDevice finished</font>";
+        tvRead.append("\n");
+        tvRead.append(Html.fromHtml(text));
+        tvRead.append("\n");
+        
     }
 
     private Runnable mLoop = new Runnable() {
@@ -180,6 +226,10 @@ public class MainActivity extends Activity {
             mThreadIsStopped = false;
             while(true) {
                 if(mThreadIsStopped) {
+//                    String text = "<font color=#FF9640>mLoop stopped, break</font>";
+//                    tvRead.append("\n");
+//                    tvRead.append(Html.fromHtml(text));
+//                    tvRead.append("\n");
                     break;
                 }
 
@@ -205,6 +255,15 @@ public class MainActivity extends Activity {
                             @Override
                             public void run() {
                                 tvRead.append(String.copyValueOf(rchar,0,mReadSize));
+//                                // scroll down
+//                                tvReadScroll.fullScroll(View.FOCUS_DOWN);
+                                tvReadScroll.post(new Runnable() {
+
+                                	   @Override
+                                	   public void run() {
+                                		   tvReadScroll.fullScroll(View.FOCUS_DOWN);
+                                	   }
+                                	});                                
                             }
                         });
 
@@ -215,6 +274,7 @@ public class MainActivity extends Activity {
     };
 
     private void closeDevice() {
+    	Log.d(TAG, "Close Device");
         mThreadIsStopped = true;
         updateView(false);
         if(ftDev != null) {
@@ -236,7 +296,12 @@ public class MainActivity extends Activity {
 
     public void SetConfig(int baud, byte dataBits, byte stopBits, byte parity, byte flowControl) {
         if (ftDev.isOpen() == false) {
-            Log.e(TAG, "SetConfig: device not open");
+//            Log.e(TAG, "SetConfig: device not open");
+//            String text = "<font color=#85004B>SetConfig: device not open</font>";
+//            tvRead.append("\n");
+//            tvRead.append(Html.fromHtml(text));
+//            tvRead.append("\n");
+//
             return;
         }
 
